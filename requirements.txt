@@ -1,0 +1,13 @@
+beautifulsoup4==4.11.2
+datasets==3.5.0
+evaluate==0.4.3
+fake_useragent==2.2.0
+matplotlib==3.7.1
+numpy==2.2.5
+polars==1.27.1
+scikit_learn==1.2.1
+selenium==4.31.0
+torch==2.5.0
+transformers==4.47.0
+wandb==0.19.9
+webdriver_manager==4.0.2
