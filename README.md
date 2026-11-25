@@ -79,13 +79,13 @@ python -m pip install -r requirements.txt
 jupyter lab
 ```
 
-Для запуска ноутбуков локально скачайте CSV с Kaggle и поместите его в `data/`. Каталог `data/` исключён из Git. На Kaggle ноутбуки автоматически проверяют стандартный путь `/kaggle/input/kinopoisk-reviews/`.
+Датасет на Kaggle приватный. Для локального запуска скачайте CSV и поместите его в `data/`. Каталог `data/` исключён из Git. Ноутбуки поддерживают как стандартный путь `/kaggle/input/kinopoisk-reviews/`, так и путь приватного датасета `/kaggle/input/datasets/halssara/kinopoisk-reviews/`.
 
 ## Ноутбуки
 
 ### `kinopoisk-eda-baseline.ipynb`
 
-Полностью выполняется на CPU: загрузка и очистка данных, EDA, стратифицированное разбиение, мажоритарный baseline, TF-IDF + Logistic Regression, метрики, матрица ошибок, интерпретация коэффициентов и примеры предсказаний.
+[Открыть опубликованный ноутбук на Kaggle](https://www.kaggle.com/code/halssara/kinopoisk-sentiment-eda-and-tf-idf-baseline). Он полностью выполнен на CPU: загрузка и очистка данных, EDA, стратифицированное разбиение, мажоритарный baseline, TF-IDF + Logistic Regression, метрики, матрица ошибок, интерпретация коэффициентов и примеры предсказаний.
 
 ### `kinopoisk-bert.ipynb`
 
