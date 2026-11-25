@@ -12,11 +12,9 @@ from fake_useragent import UserAgent
 from selenium import webdriver
 from selenium.common.exceptions import (TimeoutException)
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
 
 # Настройка логирования
 logging.basicConfig(
@@ -43,7 +41,7 @@ class SeleniumParser:
         self.driver = self._init_driver()
 
     def _init_driver(self):
-        """Инициализация Edge WebDriver с настройками"""
+        """Инициализация Chrome WebDriver с настройками"""
         chrome_options = Options()
 
         # Настройки для имитации человека
@@ -60,9 +58,7 @@ class SeleniumParser:
         chrome_options.add_argument('--disable-browser-side-navigation')
 
         try:
-            # Автоматическая загрузка и настройка ChromeDriver
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=chrome_options)
+            driver = webdriver.Chrome(options=chrome_options)
 
             # Изменяем свойства браузера, чтобы выглядеть более "человечно"
             driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -262,30 +258,21 @@ def parse_reviews(html: str) -> List[str]:
 
 
 def parse_film_info(html: str) -> str:
-    """Парсим информацию о фильме"""
+    """Парсим название фильма с учетом разных вариантов разметки."""
     soup = BeautifulSoup(html, 'html.parser')
-    name_elements = soup.find_all(class_='styles_originalTitle__JaNKM')
-    if not name_elements:
-        return "Unknown"
-    # Берем первый найденный элемент и извлекаем текст
-    name = name_elements[0].get_text(strip=True)
-    return name if name else "Unknown"
-
-
-# def load_data(url: str) -> List[str]:
-#     """Load reviews data from URL."""
-#     r = requests.get(url, headers=HEADERS)
-#     soup = BeautifulSoup(r.text, 'html.parser')
-#     reviews = soup.find_all(class_='_reachbanner_')
-#     return [''.join(review.find_all(text=True)) for review in reviews]
-#
-# def get_name(url: str) -> tuple:
-#     """Get film name and year from URL."""
-#     r = requests.get(url, headers=HEADERS)
-#     soup = BeautifulSoup(r.text, 'html.parser')
-#     name = soup.find_all(class_='alternativeHeadline')
-#     name_clean = name[0].find_all(text=True) if name else []
-#     return (str(name_clean[0]), str(name_clean[1])) if len(name_clean) >= 2 else ('Unknown', '0')
+    selectors = (
+        'h1[class^="styles_title__"]',
+        '[class^="styles_originalTitle__"]',
+        '.alternativeHeadline',
+        'h1',
+    )
+    for selector in selectors:
+        name_element = soup.select_one(selector)
+        if name_element:
+            name = name_element.get_text(strip=True)
+            if name:
+                return name
+    return "Unknown"
 
 
 def process_url(
@@ -318,9 +305,10 @@ def process_url(
             html = parser.get_page_html()
             if html:
                 reviews = parse_reviews(html)
+                if not reviews:
+                    break
                 new_data = pl.DataFrame({
                     'film_name': [name] * len(reviews),
-                    # 'year': [year] * len(reviews),
                     'user_review': reviews,
                     'review_type': [status] * len(reviews)
                 })
@@ -332,7 +320,7 @@ def process_url(
         else:
             success = False
             break
-        return df, success
+    return df, success
 
 
 def main():
